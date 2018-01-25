@@ -1,3 +1,3 @@
-/vendor
-/node_modules
-.env
+client_secrets.json
+config.php
+vendor/
