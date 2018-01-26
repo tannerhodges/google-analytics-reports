@@ -1,6 +1,6 @@
 # Google Analytics Reports
 
-Basic example of Google Analytics API’s PHP integration.
+Basic example of Google Analytics API’s PHP integration in Laravel 5.5.
 
 ## Getting Started
 
@@ -24,20 +24,21 @@ _*The Google Analytics tutorial uses port `8080`, but I’ve chosen to use `8000
 
 ```bash
 composer install
+php artisan key:generate
 ```
 
 ### Add Google Analytics Settings
 
 ```bash
-cp config.example.php config.php
+cp .env.example .env
 ```
 
-Add the View ID for the Google Analytics property/view you want to create reports for.
+Set `GA_VIEW_ID` to the View ID for the Google Analytics property/view you want to create reports for.
 
 ### Run the Project
 
 ```bash
-php -S localhost:8000 -t .
+php artisan serve
 ```
 
 Open http://localhost:8000 in your browser and authorize the app with your Google account.

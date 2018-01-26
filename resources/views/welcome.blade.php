@@ -1,38 +1,8 @@
 <?php
 
-// Load your Google Analytics config
-require_once __DIR__ . '/config.php';
-
-// Load the Google API PHP Client Library.
-require_once __DIR__ . '/vendor/autoload.php';
-
-session_start();
-
 $client = new Google_Client();
-$client->setAuthConfig(__DIR__ . '/client_secrets.json');
+$client->setAuthConfig(base_path('client_secrets.json'));
 $client->addScope(Google_Service_Analytics::ANALYTICS_READONLY);
-
-
-// If the user has already authorized this app then get an access token
-// else redirect to ask the user to authorize access to Google Analytics.
-if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-  // Set the access token on the client.
-  $client->setAccessToken($_SESSION['access_token']);
-
-  // Create an authorized analytics service object.
-  $analytics = new Google_Service_AnalyticsReporting($client);
-
-  // Call the Analytics Reporting API V4.
-  $response = getReport($analytics);
-
-  // Print the response.
-  printResults($response);
-
-} else {
-  $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/oauth2callback.php';
-  header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
-}
-
 
 /**
  * Queries the Analytics Reporting API V4.
@@ -41,9 +11,8 @@ if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
  * @return The Analytics Reporting API V4 response.
  */
 function getReport($analytics) {
-
   // Replace with your view ID, for example XXXX.
-  $VIEW_ID = GA_VIEW_ID;
+  $VIEW_ID = env('GA_VIEW_ID');
 
   // Create the DateRange object.
   $dateRange = new Google_Service_AnalyticsReporting_DateRange();
@@ -65,7 +34,6 @@ function getReport($analytics) {
   $body->setReportRequests( array( $request) );
   return $analytics->reports->batchGet( $body );
 }
-
 
 /**
  * Parses and prints the Analytics Reporting API V4 response.
@@ -98,3 +66,97 @@ function printResults($reports) {
     }
   }
 }
+?>
+<!doctype html>
+<html lang="{{ app()->getLocale() }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Google Analytics Reports</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+
+    <!-- Styles -->
+    <style>
+    html, body {
+      background-color: #fff;
+      color: #636b6f;
+      font-family: 'Raleway', sans-serif;
+      font-weight: 100;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .full-height {
+      height: 100vh;
+    }
+
+    .flex-center {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+    }
+
+    .position-ref {
+      position: relative;
+    }
+
+    .top-right {
+      position: absolute;
+      right: 10px;
+      top: 18px;
+    }
+
+    .content {
+      text-align: center;
+    }
+
+    .title {
+      font-size: 84px;
+    }
+
+    .links > a {
+      color: #636b6f;
+      padding: 0 25px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .1rem;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .m-b-md {
+      margin-bottom: 30px;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="flex-center position-ref full-height">
+      <div class="content">
+        <div class="title m-b-md">
+          Laravel
+        </div>
+
+        @php
+
+        // Set the access token on the client.
+        $client->setAccessToken(session('access_token'));
+
+        // Create an authorized analytics service object.
+        $analytics = new Google_Service_AnalyticsReporting($client);
+
+        // Call the Analytics Reporting API V4.
+        $response = getReport($analytics);
+
+        // Print the response.
+        printResults($response);
+
+        @endphp
+
+      </div>
+    </div>
+  </body>
+</html>
